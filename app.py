@@ -143,3 +143,42 @@ else:
 
 st.divider()
 st.caption("StudyPilot AI | Student project prototype | Verify plans against your actual syllabus.")
+st.divider()
+
+st.subheader("5. Upload PDF for Revision")
+st.write(
+    "Upload your study notes and generate revision prompts "
+    "from the extracted text."
+)
+
+uploaded_pdf = st.file_uploader(
+    "Choose your notes PDF",
+    type=["pdf"]
+)
+
+if uploaded_pdf is not None:
+    if st.button("Generate PDF Revision Questions"):
+        try:
+            pdf_text = extract_pdf_text(uploaded_pdf)
+
+            if not pdf_text:
+                st.warning(
+                    "No readable text found. "
+                    "This PDF may contain scanned pages."
+                )
+            else:
+                questions = make_pdf_questions(pdf_text, count=5)
+
+                if questions:
+                    st.success("Revision prompts generated!")
+
+                    for i, item in enumerate(questions, start=1):
+                        st.markdown(f"**Q{i}. {item['Question']}**")
+                        st.write(item["Study note"])
+                else:
+                    st.warning(
+                        "Not enough readable text to generate prompts."
+                    )
+
+        except Exception as error:
+            st.error(f"Could not read this PDF: {error}")
