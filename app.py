@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import date, timedelta
-
+from pdf_agent import extract_pdf_text,make_pdf_questions
 st.set_page_config(page_title="StudyPilot AI", page_icon="🎓", layout="wide")
 
 st.title("🎓 StudyPilot AI")
