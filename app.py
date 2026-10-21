@@ -64,18 +64,18 @@ defaults = {
 }
 
 for key, value in defaults.items():
-if key not in st.session_state:
-st.session_state[key] = value
+  if key not in st.session_state:
+     st.session_state[key] = value
 
-def clean_text(text):
-return re.sub(r"\s+", " ", text).strip()
+     def clean_text(text):
+     return re.sub(r"\s+", " ", text).strip()
 
 def extract_sentences(text):
 parts = re.split(r"(?<=[.!?])\s+", clean_text(text))
 return [
 sentence.strip()
 for sentence in parts
-if len(sentence.strip().split()) >= 6
+    if len(sentence.strip().split()) >= 6
 ]
 
 def make_flashcards(text, count=10):
@@ -247,7 +247,7 @@ topic_input = st.text_area(
 topics = list(dict.fromkeys(  
     line.strip()  
     for line in topic_input.splitlines()  
-    if line.strip()  
+        if line.strip()  
 ))  
 
 if st.button("Generate / update study plan", type="primary"):  
