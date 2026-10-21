@@ -1,4 +1,6 @@
-import re
+from pathlib import Path
+
+code = r'''import re
 import random
 import unicodedata
 from io import BytesIO
@@ -20,7 +22,42 @@ st.set_page_config(
 )
 
 st.markdown(
-    """ <style> .stApp { background: linear-gradient(135deg, #f7f8ff 0%, #f4fbff 100%); } [data-testid="stSidebar"] { background: linear-gradient(180deg, #101936 0%, #202b54 100%); } [data-testid="stSidebar"] * { color: #ffffff !important; } .hero { padding: 1.5rem 1.7rem; border-radius: 22px; background: linear-gradient(120deg, #172554, #4338ca, #0891b2); color: white; margin-bottom: 1rem; } .hero h1 { color: white; margin-bottom: .3rem; } .hero p { color: #e0f2fe; margin-bottom: 0; } .metric-card { background: white; border: 1px solid #e4e9f7; border-radius: 16px; padding: 1rem; box-shadow: 0 5px 18px rgba(30, 41, 90, .06); } .small-muted { color: #64748b; font-size: .9rem; } div[data-testid="stMetric"] { background: white; border: 1px solid #e4e9f7; padding: 12px 16px; border-radius: 14px; } </style> """,
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(135deg, #f7f8ff 0%, #f4fbff 100%);
+    }
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #101936 0%, #202b54 100%);
+    }
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+    .hero {
+        padding: 1.5rem 1.7rem;
+        border-radius: 22px;
+        background: linear-gradient(120deg, #172554, #4338ca, #0891b2);
+        color: white;
+        margin-bottom: 1rem;
+    }
+    .hero h1 { color: white; margin-bottom: .3rem; }
+    .hero p { color: #e0f2fe; margin-bottom: 0; }
+    .metric-card {
+        background: white;
+        border: 1px solid #e4e9f7;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 5px 18px rgba(30, 41, 90, .06);
+    }
+    .small-muted { color: #64748b; font-size: .9rem; }
+    div[data-testid="stMetric"] {
+        background: white;
+        border: 1px solid #e4e9f7;
+        padding: 12px 16px;
+        border-radius: 14px;
+    }
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -186,7 +223,12 @@ with st.sidebar:
     st.caption("Prototype • Python + Streamlit")
 
 st.markdown(
-    """ <div class="hero"> <h1>Study smarter. Not longer. ✨</h1> <p>Plan your learning, turn PDFs into revision prompts, and track what to revisit.</p> </div> """,
+    """
+    <div class="hero">
+      <h1>Study smarter. Not longer. ✨</h1>
+      <p>Plan your learning, turn PDFs into revision prompts, and track what to revisit.</p>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -407,7 +449,17 @@ with cards_tab:
         st.caption(f"Card {st.session_state.card_index + 1} of {len(cards)}")
         current = cards[st.session_state.card_index]
         st.markdown(
-            f""" <div style="background:white;border:1px solid #dbeafe;border-radius:20px; padding:28px;min-height:150px;box-shadow:0 6px 20px rgba(30,41,90,.07)"> <div style="color:#6366f1;font-weight:700;margin-bottom:12px"> {"ANSWER" if st.session_state.card_revealed else "QUESTION"} </div> <div style="font-size:1.15rem;color:#172554"> {current["back"] if st.session_state.card_revealed else current["front"]} </div> </div> """,
+            f"""
+            <div style="background:white;border:1px solid #dbeafe;border-radius:20px;
+                        padding:28px;min-height:150px;box-shadow:0 6px 20px rgba(30,41,90,.07)">
+              <div style="color:#6366f1;font-weight:700;margin-bottom:12px">
+                {"ANSWER" if st.session_state.card_revealed else "QUESTION"}
+              </div>
+              <div style="font-size:1.15rem;color:#172554">
+                {current["back"] if st.session_state.card_revealed else current["front"]}
+              </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
         nav1, nav2, nav3 = st.columns(3)
@@ -435,3 +487,8 @@ with cards_tab:
 
 st.markdown("---")
 st.caption("StudyPilot AI • A student-built prototype. PDF prompts and confidence ratings are rule-based study aids.")
+'''
+
+path = Path("/mnt/data/app.py")
+path.write_text(code, encoding="utf-8")
+print(f"Created {path} ({len(code.splitlines())} lines).")
