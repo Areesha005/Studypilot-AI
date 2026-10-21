@@ -13,7 +13,7 @@ layout="wide",
 initial_sidebar_state="expanded",
 )
 
----------- DESIGN ----------
+#---------- DESIGN ----------
 
 st.markdown("""
 
@@ -46,7 +46,7 @@ div.stButton > button {
 }  
 </style>  """, unsafe_allow_html=True)
 
----------- SESSION STATE ----------
+#---------- SESSION STATE ----------
 
 defaults = {
 "completed": [],
@@ -152,7 +152,7 @@ for question in questions:
 random.shuffle(unique)  
 return unique[:count]
 
----------- SIDEBAR ----------
+#------- SIDEBAR ----------
 
 with st.sidebar:
 st.markdown("## 🎓 StudyPilot AI")
@@ -167,7 +167,7 @@ daily_minutes = st.slider(
 st.divider()  
 st.caption("Study smart. Revise consistently.")
 
----------- HEADER ----------
+#-------- HEADER ----------
 
 safe_name = student.strip() or "Student"
 
@@ -185,7 +185,7 @@ st.markdown(f"""
 "🃏 Flashcards",
 ])
 
----------- OVERVIEW ----------
+#------- OVERVIEW ----------
 
 with tabs[0]:
 total_completed = len(st.session_state.completed)
@@ -225,7 +225,7 @@ if st.session_state.weak_topics:
     for topic in st.session_state.weak_topics[:5]:  
         st.warning(topic)
 
----------- STUDY PLANNER ----------
+#------ STUDY PLANNER ----------
 
 with tabs[1]:
 st.subheader("📅 Build your study plan")
@@ -321,7 +321,7 @@ if st.session_state.plan:
         f"Completed: {len(completed_now)} of {len(all_topics)} topics"  
     )
 
----------- PDF STUDIO ----------
+#--------- PDF STUDIO ----------
 
 with tabs[2]:
 st.subheader("📄 PDF Studio")
@@ -456,7 +456,7 @@ if st.session_state.pdf_text:
         else:  
             st.warning("No suitable sentences found.")
 
----------- KNOWLEDGE GAPS ----------
+#-------- KNOWLEDGE GAPS ----------
 
 with tabs[3]:
 st.subheader("🧠 Knowledge Gap Detector")
@@ -539,7 +539,7 @@ if st.session_state.weak_topics:
         mime="text/csv",  
     )
 
----------- FLASHCARDS ----------
+#-------- FLASHCARDS ----------
 
 with tabs[4]:
 st.subheader("🃏 Flashcard Revision")
@@ -622,7 +622,7 @@ else:
         "'Generate PDF flashcards'. Your cards will appear here."  
     )
 
----------- FOOTER ----------
+#-------- FOOTER ----------
 
 st.divider()
 
