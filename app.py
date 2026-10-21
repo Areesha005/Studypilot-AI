@@ -1,3 +1,160 @@
+
+import re
+import random
+from datetime import date, timedelta
+
+import pandas as pd
+import streamlit as st
+from pypdf import PdfReader
+
+st.set_page_config(
+    page_title="StudyPilot AI",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# ---------- DESIGN ----------
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(135deg, #f6f8ff, #eef2ff);
+}
+.block-container {
+    padding-top: 1.5rem;
+    max-width: 1200px;
+}
+.hero {
+    background: linear-gradient(120deg, #4338ca, #2563eb);
+    padding: 28px;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 22px;
+}
+.hero h1 { color: white; }
+.hero p { color: #e0e7ff; }
+div[data-testid="stMetric"] {
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #e0e7ff;
+}
+div.stButton > button {
+    border-radius: 10px;
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------- SESSION STATE ----------
+defaults = {
+    "completed": [],
+    "plan": [],
+    "quiz": [],
+    "quiz_answers": {},
+    "quiz_submitted": False,
+    "flashcards": [],
+    "card_index": 0,
+    "card_revealed": False,
+    "pdf_text": "",
+    "pdf_name": "",
+    "weak_topics": [],
+    "quiz_history": [],
+}
+
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
+
+def clean_text(text):
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def extract_sentences(text):
+    parts = re.split(r"(?<=[.!?])\s+", clean_text(text))
+    return [
+        sentence.strip()
+        for sentence in parts
+        if len(sentence.strip().split()) >= 6
+    ]
+
+
+def make_flashcards(text, count=10):
+    sentences = extract_sentences(text)
+    cards = []
+
+    for sentence in sentences:
+        parts = re.split(
+            r"\s+(?:is|are|means|refers to)\s+",
+            sentence,
+            maxsplit=1,
+            flags=re.IGNORECASE,
+        )
+
+        if len(parts) == 2 and len(parts[0].split()) <= 8:
+            question = f"What is {parts[0].strip()}?"
+        else:
+            question = "Explain this point from your notes."
+
+        cards.append({
+            "front": question,
+            "back": sentence,
+        })
+
+    unique = []
+    seen = set()
+
+    for card in cards:
+        if card["back"] not in seen:
+            unique.append(card)
+            seen.add(card["back"])
+
+    return unique[:count]
+
+
+def make_pdf_quiz(text, count=5):
+    sentences = extract_sentences(text)
+    questions = []
+
+    for sentence in sentences:
+        words = sentence.split()
+
+        candidates = [
+            (i, word.strip(".,;:!?()[]{}"))
+            for i, word in enumerate(words)
+            if len(word.strip(".,;:!?()[]{}")) >= 5
+            and word.strip(".,;:!?()[]{}").isalpha()
+        ]
+
+        if not candidates:
+            continue
+
+        index, answer = max(
+            candidates,
+            key=lambda item: len(item[1])
+        )
+
+        blanked = words.copy()
+        blanked[index] = "_____"
+
+        questions.append({
+            "question": "Complete the statement: " + " ".join(blanked),
+            "answer": answer,
+            "source": sentence,
+        })
+
+    unique = []
+    seen = set()
+
+    for question in questions:
+        if question["question"] not in seen:
+            unique.append(question)
+            seen.add(question["question"])
+
+    random.shuffle(unique)
+    return unique[:count]
+
 from pathlib import Path
 
 code = r'''import re
