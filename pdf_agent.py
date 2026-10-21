@@ -1,32 +1,73 @@
 from io import BytesIO
+
 from pypdf import PdfReader
-import re
+
 
 def extract_pdf_text(uploaded_file):
-reader = PdfReader(BytesIO(uploaded_file.getvalue()))
+    """
+    Extract readable text from an uploaded PDF.
+    Supports Streamlit UploadedFile objects and PDF bytes.
+    """
 
-pages = [  
-    page.extract_text() or ""  
-    for page in reader.pages  
-]  
+    if hasattr(uploaded_file, "getvalue"):
+        pdf_bytes = uploaded_file.getvalue()
+    elif isinstance(uploaded_file, bytes):
+        pdf_bytes = uploaded_file
+    else:
+        raise TypeError(
+            "Expected a Streamlit uploaded file or PDF bytes."
+        )
 
-return "\n".join(pages).strip()
+    if not pdf_bytes:
+        raise ValueError("The uploaded PDF is empty.")
 
-def make_pdf_questions(text, count=5):
-sentences = re.split(r"(?<=[.!?])\s+", text)
+    extracted_text = ""
 
-sentences = [  
-    s.strip()  
-    for s in sentences  
-    if len(s.strip().split()) >= 5  
-]  
+    # First try PyMuPDF.
+    try:
+        import fitz
 
-sentences = list(dict.fromkeys(sentences))  
+        with fitz.open(
+            stream=pdf_bytes,
+            filetype="pdf",
+        ) as document:
+            extracted_text = "\n\n".join(
+                page.get_text("text", sort=True) or ""
+                for page in document
+            )
+    except Exception:
+        extracted_text = ""
 
-return [  
-    {  
-        "Question": "Explain this statement in your own words:",  
-        "Study note": sentence  
-    }  
-    for sentence in sentences[:count]  
-]
+    # Fall back to pypdf.
+    if not extracted_text.strip():
+        try:
+            reader = PdfReader(BytesIO(pdf_bytes))
+
+            if reader.is_encrypted:
+                try:
+                    reader.decrypt("")
+                except Exception as exc:
+                    raise ValueError(
+                        "This PDF is password-protected."
+                    ) from exc
+
+            extracted_text = "\n\n".join(
+                page.extract_text() or ""
+                for page in reader.pages
+            )
+        except ValueError:
+            raise
+        except Exception as exc:
+            raise ValueError(
+                f"Could not read the PDF: {exc}"
+            ) from exc
+
+    extracted_text = extracted_text.strip()
+
+    if not extracted_text:
+        raise ValueError(
+            "No readable text found. "
+            "This may be a scanned PDF requiring OCR."
+        )
+
+    return extracted_text
